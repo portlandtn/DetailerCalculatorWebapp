@@ -94,6 +94,7 @@ function sanitizeEntry(value: string) {
 export default function Home() {
   const [state, setState] = useState<CalculatorState>(DEFAULT_STATE);
   const [hydrated, setHydrated] = useState(false);
+  const [isMobileInput, setIsMobileInput] = useState(true);
   const [past, setPast] = useState<number[][]>([]);
   const [future, setFuture] = useState<number[][]>([]);
   const [notice, setNotice] = useState('');
@@ -101,6 +102,15 @@ export default function Home() {
   const noticeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
+    const mobileInputQuery = window.matchMedia('(hover: none) and (pointer: coarse)');
+
+    function updateMobileInput() {
+      setIsMobileInput(mobileInputQuery.matches);
+    }
+
+    updateMobileInput();
+    mobileInputQuery.addEventListener('change', updateMobileInput);
+
     const restoreTimer = window.setTimeout(() => {
       try {
         const saved = window.localStorage.getItem(STORAGE_KEY);
@@ -117,9 +127,12 @@ export default function Home() {
         // A malformed local value should never prevent the calculator from opening.
       }
       setHydrated(true);
-      inputRef.current?.focus({ preventScroll: true });
+      if (!mobileInputQuery.matches) inputRef.current?.focus({ preventScroll: true });
     }, 0);
-    return () => window.clearTimeout(restoreTimer);
+    return () => {
+      window.clearTimeout(restoreTimer);
+      mobileInputQuery.removeEventListener('change', updateMobileInput);
+    };
   }, []);
 
   useEffect(() => {
@@ -133,6 +146,10 @@ export default function Home() {
 
   function patchState(patch: Partial<CalculatorState>) {
     setState((current) => ({ ...current, ...patch }));
+  }
+
+  function focusEntry() {
+    if (!isMobileInput) inputRef.current?.focus({ preventScroll: true });
   }
 
   function showNotice(message: string) {
@@ -159,7 +176,7 @@ export default function Home() {
     }
     commitStack([...state.stack, value]);
     patchState({ entry: '' });
-    inputRef.current?.focus({ preventScroll: true });
+    focusEntry();
   }
 
   function runOperator(operator: Operator) {
@@ -175,12 +192,12 @@ export default function Home() {
     } catch (error) {
       showNotice(error instanceof Error ? error.message : 'Unable to calculate.');
     }
-    inputRef.current?.focus({ preventScroll: true });
+    focusEntry();
   }
 
   function appendKey(value: string) {
     patchState({ entry: sanitizeEntry(`${state.entry}${value}`) });
-    inputRef.current?.focus({ preventScroll: true });
+    focusEntry();
   }
 
   function drop(clearEntry = false) {
@@ -338,8 +355,12 @@ export default function Home() {
                 aria-label="Calculator entry"
                 autoComplete="off"
                 value={state.entry}
-                inputMode="decimal"
+                inputMode={isMobileInput ? 'none' : 'decimal'}
+                readOnly={isMobileInput}
                 placeholder={state.mode === 'detailing' ? 'feet.inches16  ·  12.0608' : '0.0000'}
+                onFocus={(event) => {
+                  if (isMobileInput) event.currentTarget.blur();
+                }}
                 onChange={(event) => patchState({ entry: sanitizeEntry(event.target.value) })}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') { event.preventDefault(); pushEntry(); return; }
