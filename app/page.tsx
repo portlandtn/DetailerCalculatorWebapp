@@ -415,6 +415,7 @@ export default function Home() {
               <span>Stack · tap to copy</span>
               <span>{state.stack.length} {state.stack.length === 1 ? 'value' : 'values'}</span>
             </span>
+            {state.entry && <span className="mobile-entry-preview"><span>Entry</span><strong>{state.entry}</strong></span>}
             <ol aria-live="polite">
               {!visibleStack.length && <li className="empty-stack">Stack empty</li>}
               {visibleStack.map((value, index) => (
@@ -502,6 +503,8 @@ export default function Home() {
                   <button onClick={() => appendKey('0')}>0</button>
                   <button onClick={() => appendKey('.')}>.</button>
                   <button className="operator accent" aria-label="Add" onClick={() => runOperator('add')}>+</button>
+                  <button className="mobile-only-key mobile-backspace-key" disabled={!state.entry} aria-label="Delete last entry digit" onClick={backspaceEntry}>⌫</button>
+                  <button className="mobile-only-key mobile-enter-key" onClick={pushEntry}>Enter ↵</button>
                 </div>
               </div>
             </div>

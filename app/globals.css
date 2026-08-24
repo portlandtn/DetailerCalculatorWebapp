@@ -64,6 +64,7 @@ h2 { margin: 0; font-size: 16px; letter-spacing: -.025em; }
 .stack-display li.current { margin-top: 4px; padding-top: 8px; border-top: 1px solid #253746; color: var(--accent-2); }
 .stack-display li.current output { font-size: clamp(23px, 6vw, 33px); font-weight: 650; letter-spacing: -.04em; }
 .stack-display .empty-stack { display: grid; place-items: center; min-height: 160px; color: #536773; font-family: var(--font-geist-sans), sans-serif; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+.mobile-entry-preview { display: none; }
 .dimension-caption { display: block; min-height: 16px; color: #7f939f; font-family: var(--font-geist-mono), monospace; font-size: 11px; text-align: right; }
 .entry-row { margin: 12px 0; display: grid; grid-template-columns: 1fr auto; gap: 10px; }
 .entry-row label { position: relative; display: block; }
@@ -91,6 +92,7 @@ h2 { margin: 0; font-size: 16px; letter-spacing: -.025em; }
 .keypad button:active, .stack-actions button:active, .enter-key:active { transform: translateY(1px); }
 .keypad .operator { background: linear-gradient(#344959, #273a49); color: #dce8ec; font-size: 20px; }
 .keypad .accent { border-color: #8f6629; color: var(--accent-2); }
+.mobile-only-key { display: none; }
 .stack-actions { margin-top: 10px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .stack-actions button { min-height: 40px; color: #aab8c0; font-size: 11px; }
 .stack-actions .danger { color: var(--red); }
@@ -192,7 +194,10 @@ kbd { padding: 2px 5px; border: 1px solid #41515e; border-bottom-width: 2px; bor
   .home-angle-button { order: 2; min-height: 40px; margin-bottom: 7px; padding: 6px 9px; flex: 0 0 auto; grid-template-columns: auto minmax(0, 1fr) auto; gap: 7px; }
   .home-angle-button strong { font-size: 16px; }
   .home-angle-button small { font-size: 10px; }
-  .stack-display { order: 4; min-height: clamp(174px, 34dvh, 282px); flex: 0 0 auto; padding: 9px; display: flex; flex-direction: column; overflow: hidden; }
+  .stack-display { order: 4; min-height: clamp(218px, 43dvh, 360px); flex: 0 0 auto; padding: 9px; display: flex; flex-direction: column; overflow: hidden; }
+  .mobile-entry-preview { min-height: 34px; margin-bottom: 7px; padding: 6px 8px; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 8px; border: 1px solid #263746; border-radius: 8px; background: #0b151d; color: var(--accent-2); font-family: var(--font-geist-mono), monospace; }
+  .mobile-entry-preview span { color: #728693; font-family: var(--font-geist-sans), sans-serif; font-size: 9px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+  .mobile-entry-preview strong { overflow: hidden; font-size: 15px; text-align: right; text-overflow: ellipsis; }
   .stack-display ol { min-height: 92px; flex: 1 1 auto; overflow: hidden; }
   .stack-display li { padding-block: 0; }
   .stack-display li.current { padding-top: 3px; }
@@ -200,7 +205,7 @@ kbd { padding: 2px 5px; border: 1px solid #41515e; border-bottom-width: 2px; bor
   .dimension-caption { min-height: 13px; font-size: 9px; }
   .stack-actions { order: 3; margin: 0 0 7px; flex: 0 0 auto; gap: 6px; }
   .stack-actions button { min-height: clamp(34px, 5.5dvh, 40px); }
-  .entry-row { order: 5; margin: 7px 0 0; flex: 0 0 auto; }
+  .entry-row { display: none; }
   .entry-row input { height: clamp(48px, 8dvh, 58px); }
   .entry-actions { gap: 6px; }
   .backspace-key { width: 48px; }
@@ -226,6 +231,10 @@ kbd { padding: 2px 5px; border: 1px solid #41515e; border-bottom-width: 2px; bor
   .calculator-trig-grid button { min-height: clamp(38px, 6.4dvh, 48px); font-size: 10px; }
   .keypad { flex: 0 0 auto; gap: 6px; }
   .keypad button { min-height: clamp(36px, 6.1dvh, 52px); font-size: 16px; }
+  .keypad .mobile-only-key { display: block; }
+  .keypad .mobile-backspace-key { grid-column: span 1; color: #dce7eb; font-size: 20px; }
+  .keypad .mobile-backspace-key:disabled { opacity: .35; cursor: default; }
+  .keypad .mobile-enter-key { grid-column: span 3; border-color: #d2912f; background: linear-gradient(#f4b955, #df941f); color: #16120c; font-weight: 850; }
   .tools-card { min-height: 0; overflow-y: auto; overscroll-behavior-y: contain; }
   .angle-strip { padding: 17px; }
   .tool-tabs { padding: 0 6px; }
