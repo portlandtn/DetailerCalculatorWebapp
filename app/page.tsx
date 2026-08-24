@@ -348,7 +348,7 @@ export default function Home() {
   }
 
   return (
-    <main className="app-shell">
+    <main className={`app-shell ${mobileKeypadOpen ? 'mobile-keypad-open' : ''}`}>
       <header className="topbar">
         <div className="brand-lockup">
           <span className="brand-mark" aria-hidden="true">DC</span>
