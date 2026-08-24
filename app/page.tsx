@@ -22,6 +22,7 @@ import {
 type ToolTab = 'triangle' | 'convert' | 'weight' | 'guide';
 type Unit = 'feet' | 'inches';
 type MobilePage = 'calculator' | 'tools';
+type MobileKeypadTab = 'numbers' | 'triangle';
 
 interface CalculatorState {
   stack: number[];
@@ -97,6 +98,8 @@ export default function Home() {
   const [hydrated, setHydrated] = useState(false);
   const [isMobileInput, setIsMobileInput] = useState(true);
   const [mobilePage, setMobilePage] = useState<MobilePage>('calculator');
+  const [mobileKeypadOpen, setMobileKeypadOpen] = useState(false);
+  const [mobileKeypadTab, setMobileKeypadTab] = useState<MobileKeypadTab>('numbers');
   const [past, setPast] = useState<number[][]>([]);
   const [future, setFuture] = useState<number[][]>([]);
   const [notice, setNotice] = useState('');
@@ -153,6 +156,11 @@ export default function Home() {
 
   function focusEntry() {
     if (!isMobileInput) inputRef.current?.focus({ preventScroll: true });
+  }
+
+  function openMobileKeypad(tab: MobileKeypadTab = 'numbers') {
+    setMobileKeypadTab(tab);
+    setMobileKeypadOpen(true);
   }
 
   function showNotice(message: string) {
@@ -420,7 +428,11 @@ export default function Home() {
                 readOnly={isMobileInput}
                 placeholder={state.mode === 'detailing' ? 'feet.inches16  ·  12.0608' : '0.0000'}
                 onFocus={(event) => {
+                  if (isMobileInput) openMobileKeypad('numbers');
                   if (isMobileInput) event.currentTarget.blur();
+                }}
+                onClick={() => {
+                  if (isMobileInput) openMobileKeypad('numbers');
                 }}
                 onChange={(event) => patchState({ entry: sanitizeEntry(event.target.value) })}
                 onKeyDown={(event) => {
@@ -445,27 +457,43 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="calculator-angle-tools">
-            <button className="active-angle-button" onClick={cycleActiveAngle}>
-              <span>Angle {state.activeAngle + 1}</span>
-              <strong>{formatValue(activeAngle, 4)}°</strong>
-            </button>
-            <div className="trig-grid calculator-trig-grid" aria-label="Side conversions">
-              {TRIG_BUTTONS.map((button) => <button key={button.operation} title={button.label} onClick={() => runTrig(button.operation)}>{button.short}</button>)}
+          <div className={`mobile-keypad-shell ${mobileKeypadOpen ? 'open' : ''}`}>
+            <div className="mobile-keypad-header">
+              <div className="mobile-keypad-tabs" aria-label="Mobile keypad">
+                <button className={mobileKeypadTab === 'numbers' ? 'active' : ''} onClick={() => setMobileKeypadTab('numbers')}>Numbers</button>
+                <button className={mobileKeypadTab === 'triangle' ? 'active' : ''} onClick={() => setMobileKeypadTab('triangle')}>Triangle</button>
+              </div>
+              <button className="mobile-keypad-close" aria-label="Close keypad" onClick={() => setMobileKeypadOpen(false)}>×</button>
             </div>
-          </div>
 
-          <div className="keypad" aria-label="Calculator keypad">
-            {['7', '8', '9'].map((key) => <button key={key} onClick={() => appendKey(key)}>{key}</button>)}
-            <button className="operator" aria-label="Divide" onClick={() => runOperator('divide')}>÷</button>
-            {['4', '5', '6'].map((key) => <button key={key} onClick={() => appendKey(key)}>{key}</button>)}
-            <button className="operator" aria-label="Multiply" onClick={() => runOperator('multiply')}>×</button>
-            {['1', '2', '3'].map((key) => <button key={key} onClick={() => appendKey(key)}>{key}</button>)}
-            <button className="operator" aria-label="Subtract" onClick={() => runOperator('subtract')}>−</button>
-            <button onClick={toggleSign}>+/−</button>
-            <button onClick={() => appendKey('0')}>0</button>
-            <button onClick={() => appendKey('.')}>.</button>
-            <button className="operator accent" aria-label="Add" onClick={() => runOperator('add')}>+</button>
+            <div className="mobile-keypad-body">
+              <div className={`mobile-keypad-panel triangle-panel ${mobileKeypadTab === 'triangle' ? 'active' : ''}`}>
+                <div className="calculator-angle-tools">
+                  <button className="active-angle-button" onClick={cycleActiveAngle}>
+                    <span>Angle {state.activeAngle + 1}</span>
+                    <strong>{formatValue(activeAngle, 4)}°</strong>
+                  </button>
+                  <div className="trig-grid calculator-trig-grid" aria-label="Side conversions">
+                    {TRIG_BUTTONS.map((button) => <button key={button.operation} title={button.label} onClick={() => runTrig(button.operation)}>{button.short}</button>)}
+                  </div>
+                </div>
+              </div>
+
+              <div className={`mobile-keypad-panel numbers-panel ${mobileKeypadTab === 'numbers' ? 'active' : ''}`}>
+                <div className="keypad" aria-label="Calculator keypad">
+                  {['7', '8', '9'].map((key) => <button key={key} onClick={() => appendKey(key)}>{key}</button>)}
+                  <button className="operator" aria-label="Divide" onClick={() => runOperator('divide')}>÷</button>
+                  {['4', '5', '6'].map((key) => <button key={key} onClick={() => appendKey(key)}>{key}</button>)}
+                  <button className="operator" aria-label="Multiply" onClick={() => runOperator('multiply')}>×</button>
+                  {['1', '2', '3'].map((key) => <button key={key} onClick={() => appendKey(key)}>{key}</button>)}
+                  <button className="operator" aria-label="Subtract" onClick={() => runOperator('subtract')}>−</button>
+                  <button onClick={toggleSign}>+/−</button>
+                  <button onClick={() => appendKey('0')}>0</button>
+                  <button onClick={() => appendKey('.')}>.</button>
+                  <button className="operator accent" aria-label="Add" onClick={() => runOperator('add')}>+</button>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="stack-actions">
@@ -473,6 +501,15 @@ export default function Home() {
             <button onClick={swap}>Swap</button>
             <button className="danger" onClick={() => { if (state.stack.length) commitStack([]); }}>Clear stack</button>
           </div>
+
+          <button
+            className="mobile-keypad-toggle"
+            aria-label="Open keypad"
+            aria-expanded={mobileKeypadOpen}
+            onClick={() => openMobileKeypad(mobileKeypadTab)}
+          >
+            ⌨
+          </button>
         </section>
 
         <aside className="tools-card">
