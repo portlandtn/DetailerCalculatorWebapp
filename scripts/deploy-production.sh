@@ -86,6 +86,7 @@ deploy() {
     atomic_switch "$previous_target"
     if restart_and_check; then
       echo "Rollback succeeded: $previous_target" >&2
+      rm -rf -- "$release_dir"
     else
       echo 'Rollback health check failed.' >&2
     fi
