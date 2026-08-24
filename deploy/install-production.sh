@@ -66,6 +66,7 @@ if health_check "$HEALTH_LOCAL" && health_check "$HEALTH_PUBLIC" && systemctl is
   if [[ "$old_was_enabled" -eq 1 ]]; then
     user_systemctl disable detailer-calculator.service
   fi
+  touch "$release_dir/.deployment-success"
   echo 'Cutover succeeded.'
   echo "Current release: $(readlink -f "$CURRENT")"
   echo 'Local health: HTTP 200'

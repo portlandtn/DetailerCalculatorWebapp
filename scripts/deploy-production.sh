@@ -37,7 +37,8 @@ latest_previous_release() {
   local current_target current_name
   current_target=$(readlink -f "$CURRENT_LINK" 2>/dev/null || true)
   current_name=${current_target##*/}
-  find "$RELEASES_DIR" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' \
+  find "$RELEASES_DIR" -mindepth 2 -maxdepth 2 -type f -name .deployment-success -printf '%h\n' \
+    | sed 's#.*/##' \
     | sort -r \
     | while read -r release; do
         [[ "$release" != "$current_name" ]] && { echo "$release"; return; }
@@ -57,7 +58,7 @@ rollback_to_previous() {
 }
 
 prune_releases() {
-  mapfile -t releases < <(find "$RELEASES_DIR" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort -r)
+  mapfile -t releases < <(find "$RELEASES_DIR" -mindepth 2 -maxdepth 2 -type f -name .deployment-success -printf '%h\n' | sed 's#.*/##' | sort -r)
   for release in "${releases[@]:5}"; do
     rm -rf -- "$RELEASES_DIR/$release"
   done
@@ -73,9 +74,13 @@ deploy() {
   mkdir -p "$RELEASES_DIR"
   mkdir "$release_dir"
   rsync -a --delete --exclude='.git' --exclude='.github' "$SOURCE_DIR/" "$release_dir/"
+  if [[ -n "$previous_target" && -d "$previous_target" && ! -f "$previous_target/.deployment-success" ]]; then
+    touch "$previous_target/.deployment-success"
+  fi
   atomic_switch "$release_dir"
 
   if restart_and_check; then
+    touch "$release_dir/.deployment-success"
     prune_releases
     echo "Deployment succeeded: $release_id"
     exit 0
