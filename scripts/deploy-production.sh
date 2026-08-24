@@ -16,10 +16,15 @@ atomic_switch() {
 }
 
 health_check() {
-  local code
-  code=$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
-    --max-time 20 "$HEALTH_URL")
-  [[ "$code" == 200 ]]
+  local code attempt
+  for attempt in {1..30}; do
+    code=$(curl --silent --output /dev/null --write-out '%{http_code}' \
+      --max-time 5 "$HEALTH_URL" 2>/dev/null || true)
+    [[ "$code" == 200 ]] && return 0
+    sleep 1
+  done
+  echo "Health check failed after 30 seconds (last HTTP code: ${code:-connection failure})" >&2
+  return 1
 }
 
 restart_and_check() {
