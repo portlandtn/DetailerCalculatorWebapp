@@ -64,7 +64,6 @@ h2 { margin: 0; font-size: 16px; letter-spacing: -.025em; }
 .stack-display li.current { margin-top: 4px; padding-top: 8px; border-top: 1px solid #253746; color: var(--accent-2); }
 .stack-display li.current output { font-size: clamp(23px, 6vw, 33px); font-weight: 650; letter-spacing: -.04em; }
 .stack-display .empty-stack { display: grid; place-items: center; min-height: 160px; color: #536773; font-family: var(--font-geist-sans), sans-serif; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
-.mobile-entry-preview { display: none; }
 .dimension-caption { display: block; min-height: 16px; color: #7f939f; font-family: var(--font-geist-mono), monospace; font-size: 11px; text-align: right; }
 .entry-row { margin: 12px 0; display: grid; grid-template-columns: 1fr auto; gap: 10px; }
 .entry-row label { position: relative; display: block; }
@@ -196,10 +195,7 @@ kbd { padding: 2px 5px; border: 1px solid #41515e; border-bottom-width: 2px; bor
   .home-angle-button strong { font-size: 16px; }
   .home-angle-button small { font-size: 10px; }
   .stack-display { order: 3; min-height: clamp(218px, 43dvh, 360px); flex: 0 0 auto; padding: 9px; display: flex; flex-direction: column; overflow: hidden; }
-  .mobile-keypad-open .stack-display { min-height: clamp(252px, 50dvh, 430px); }
-  .mobile-entry-preview { min-height: 34px; margin-bottom: 7px; padding: 6px 8px; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 8px; border: 1px solid #263746; border-radius: 8px; background: #0b151d; color: var(--accent-2); font-family: var(--font-geist-mono), monospace; }
-  .mobile-entry-preview span { color: #728693; font-family: var(--font-geist-sans), sans-serif; font-size: 9px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
-  .mobile-entry-preview strong { overflow: hidden; font-size: 15px; text-align: right; text-overflow: ellipsis; }
+  .mobile-keypad-open .stack-display { min-height: clamp(196px, 33dvh, 300px); }
   .stack-display ol { min-height: 92px; flex: 1 1 auto; overflow: hidden; }
   .stack-display li { padding-block: 0; }
   .stack-display li.current { padding-top: 3px; }

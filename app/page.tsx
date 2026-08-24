@@ -332,8 +332,25 @@ export default function Home() {
     );
   }, [state.lengthInput, state.widthInput, state.thicknessInput, state.lengthUnit, state.widthUnit, state.mode]);
 
-  const visibleStack = state.stack.slice(-16);
+  const hasEntry = state.entry.trim() !== '';
+  const entryValue = numberFromInput(state.entry);
+  const visibleStack = state.stack.slice(hasEntry ? -15 : -16);
+  const stackRows = [
+    ...visibleStack.map((value, index) => ({
+      key: `${state.stack.length - visibleStack.length + index}-${value}`,
+      label: String(visibleStack.length - index),
+      output: formatValue(value, state.rounding),
+      isCurrent: !hasEntry && index === visibleStack.length - 1,
+    })),
+    ...(hasEntry ? [{
+      key: `entry-${state.entry}`,
+      label: 'E',
+      output: state.entry,
+      isCurrent: true,
+    }] : []),
+  ];
   const activeValue = state.stack.at(-1);
+  const captionValue = hasEntry ? entryValue : activeValue;
   const activeAngle = state.angles[state.activeAngle];
 
   function finishMobileSwipe(x: number, y: number) {
@@ -415,17 +432,16 @@ export default function Home() {
               <span>Stack · tap to copy</span>
               <span>{state.stack.length} {state.stack.length === 1 ? 'value' : 'values'}</span>
             </span>
-            {state.entry && <span className="mobile-entry-preview"><span>Entry</span><strong>{state.entry}</strong></span>}
             <ol aria-live="polite">
-              {!visibleStack.length && <li className="empty-stack">Stack empty</li>}
-              {visibleStack.map((value, index) => (
-                <li key={`${state.stack.length - visibleStack.length + index}-${value}`} className={index === visibleStack.length - 1 ? 'current' : ''}>
-                  <span>{visibleStack.length - index}</span>
-                  <output>{formatValue(value, state.rounding)}</output>
+              {!stackRows.length && <li className="empty-stack">Stack empty</li>}
+              {stackRows.map((row) => (
+                <li key={row.key} className={row.isCurrent ? 'current' : ''}>
+                  <span>{row.label}</span>
+                  <output>{row.output}</output>
                 </li>
               ))}
             </ol>
-            {state.mode === 'detailing' && activeValue !== undefined && <span className="dimension-caption">{detailingLabel(activeValue)}</span>}
+            {state.mode === 'detailing' && captionValue !== undefined && <span className="dimension-caption">{detailingLabel(captionValue)}</span>}
           </button>
 
           <div className="entry-row">
