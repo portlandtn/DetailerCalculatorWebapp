@@ -21,6 +21,7 @@ import {
 
 type ToolTab = 'triangle' | 'convert' | 'weight' | 'guide';
 type Unit = 'feet' | 'inches';
+type MobilePage = 'calculator' | 'tools';
 
 interface CalculatorState {
   stack: number[];
@@ -95,11 +96,13 @@ export default function Home() {
   const [state, setState] = useState<CalculatorState>(DEFAULT_STATE);
   const [hydrated, setHydrated] = useState(false);
   const [isMobileInput, setIsMobileInput] = useState(true);
+  const [mobilePage, setMobilePage] = useState<MobilePage>('calculator');
   const [past, setPast] = useState<number[][]>([]);
   const [future, setFuture] = useState<number[][]>([]);
   const [notice, setNotice] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const noticeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const swipeStart = useRef<{ x: number; y: number } | undefined>(undefined);
 
   useEffect(() => {
     const mobileInputQuery = window.matchMedia('(hover: none) and (pointer: coarse)');
@@ -200,6 +203,11 @@ export default function Home() {
     focusEntry();
   }
 
+  function backspaceEntry() {
+    patchState({ entry: state.entry.slice(0, -1) });
+    focusEntry();
+  }
+
   function drop(clearEntry = false) {
     if (!state.stack.length) return showNotice('The stack is already empty.');
     commitStack(state.stack.slice(0, -1));
@@ -289,6 +297,17 @@ export default function Home() {
   const activeValue = state.stack.at(-1);
   const activeAngle = state.angles[state.activeAngle];
 
+  function finishMobileSwipe(x: number, y: number) {
+    const start = swipeStart.current;
+    swipeStart.current = undefined;
+    if (!isMobileInput || !start) return;
+
+    const horizontalDistance = x - start.x;
+    const verticalDistance = y - start.y;
+    if (Math.abs(horizontalDistance) < 50 || Math.abs(horizontalDistance) <= Math.abs(verticalDistance)) return;
+    setMobilePage(horizontalDistance < 0 ? 'tools' : 'calculator');
+  }
+
   return (
     <main className="app-shell">
       <header className="topbar">
@@ -304,7 +323,23 @@ export default function Home() {
         </span>
       </header>
 
-      <div className="workspace">
+      <nav className="mobile-page-nav" aria-label="Mobile workspace pages">
+        <button className={mobilePage === 'calculator' ? 'active' : ''} onClick={() => setMobilePage('calculator')}>Calculator</button>
+        <button className={mobilePage === 'tools' ? 'active' : ''} onClick={() => setMobilePage('tools')}>Tools</button>
+      </nav>
+
+      <div
+        className={`workspace mobile-page-${mobilePage}`}
+        onTouchStart={(event) => {
+          const touch = event.changedTouches[0];
+          swipeStart.current = { x: touch.clientX, y: touch.clientY };
+        }}
+        onTouchCancel={() => { swipeStart.current = undefined; }}
+        onTouchEnd={(event) => {
+          const touch = event.changedTouches[0];
+          finishMobileSwipe(touch.clientX, touch.clientY);
+        }}
+      >
         <section className="calculator-card" aria-label="RPN calculator">
           <div className="mode-row">
             <div className="segmented" aria-label="Math method">
@@ -370,7 +405,18 @@ export default function Home() {
                 }}
               />
             </label>
-            <button className="enter-key" onClick={pushEntry}>Enter <span>↵</span></button>
+            <div className="entry-actions">
+              <button
+                className="backspace-key"
+                disabled={!state.entry}
+                aria-label="Delete last entry digit"
+                title="Delete last entry digit"
+                onClick={backspaceEntry}
+              >
+                ⌫
+              </button>
+              <button className="enter-key" onClick={pushEntry}>Enter <span>↵</span></button>
+            </div>
           </div>
 
           <div className="keypad" aria-label="Calculator keypad">
