@@ -165,27 +165,27 @@ kbd { padding: 2px 5px; border: 1px solid #41515e; border-bottom-width: 2px; bor
 }
 
 @media (max-width: 560px) {
-  html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
-  .app-shell { height: 100dvh; min-height: 0; padding: 8px; display: flex; flex-direction: column; overflow: hidden; }
+  html, body { min-height: 100%; overflow-x: hidden; overscroll-behavior-x: none; }
+  .app-shell { min-height: 100dvh; padding: 8px; display: flex; flex-direction: column; overflow: visible; }
   .topbar { flex: 0 0 auto; margin-bottom: 7px; }
   .brand-mark { width: 36px; height: 36px; }
   .save-status { width: 8px; overflow: hidden; white-space: nowrap; }
   .mobile-page-nav { width: 100%; flex: 0 0 auto; margin: 0 auto 7px; padding: 3px; display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 10px; background: #0b131b; }
   .mobile-page-nav button { min-height: 30px; border: 0; border-radius: 7px; background: transparent; color: var(--muted); font-size: 11px; font-weight: 750; cursor: pointer; }
   .mobile-page-nav button.active { background: #293a49; color: #fff; }
-  .workspace { width: 100%; min-height: 0; flex: 1 1 auto; margin: 0; display: flex; gap: 0; align-items: stretch; transform: translateX(0); transition: transform .22s ease; touch-action: pan-y; }
+  .workspace { width: 100%; min-height: 0; flex: 0 0 auto; margin: 0; display: flex; gap: 0; align-items: flex-start; transform: translateX(0); transition: transform .22s ease; touch-action: pan-y; }
   .workspace.mobile-page-tools { transform: translateX(-100%); }
-  .workspace > .calculator-card, .workspace > .tools-card { width: 100%; min-width: 100%; height: 100%; flex: 0 0 100%; }
+  .workspace > .calculator-card, .workspace > .tools-card { width: 100%; min-width: 100%; height: auto; flex: 0 0 100%; }
   .calculator-card, .tools-card { border-radius: 16px; }
-  .calculator-card { padding: 9px; display: flex; flex-direction: column; overflow: hidden; }
+  .calculator-card { padding: 9px; display: flex; flex-direction: column; overflow: visible; }
   .mode-row { margin-bottom: 7px; flex: 0 0 auto; align-items: flex-end; }
   .rounding-control { flex-direction: column; align-items: flex-end; gap: 3px; }
   .rounding-control > span { display: none; }
-  .stack-display { min-height: 72px; flex: 1 1 auto; padding: 9px; display: flex; flex-direction: column; overflow: hidden; }
-  .stack-display ol { min-height: 0; flex: 1 1 auto; overflow: hidden; }
+  .stack-display { min-height: clamp(160px, 30dvh, 230px); flex: 0 0 auto; padding: 9px; display: flex; flex-direction: column; overflow: hidden; }
+  .stack-display ol { min-height: 92px; flex: 1 1 auto; overflow: hidden; }
   .stack-display li { padding-block: 0; }
   .stack-display li.current { padding-top: 3px; }
-  .stack-display li.current output { font-size: clamp(20px, 5dvh, 29px); }
+  .stack-display li.current output { font-size: clamp(26px, 8vw, 32px); }
   .dimension-caption { min-height: 13px; font-size: 9px; }
   .entry-row { margin: 7px 0; flex: 0 0 auto; }
   .entry-row input { height: clamp(48px, 8dvh, 58px); }
