@@ -183,6 +183,27 @@ export default function Home() {
   }
 
   function runOperator(operator: Operator) {
+    const entryValue = numberFromInput(state.entry);
+    if (state.entry.trim() !== '') {
+      const left = state.stack.at(-1);
+      if (entryValue === undefined) {
+        showNotice('Enter a valid number.');
+        return;
+      }
+      if (left === undefined) {
+        showNotice('Add a stack value first.');
+        return;
+      }
+      try {
+        commitStack([...state.stack.slice(0, -1), calculate(operator, left, entryValue, state.mode)]);
+        patchState({ entry: '' });
+      } catch (error) {
+        showNotice(error instanceof Error ? error.message : 'Unable to calculate.');
+      }
+      focusEntry();
+      return;
+    }
+
     if (state.stack.length < 2) {
       showNotice('Two stack values are required.');
       return;
@@ -195,6 +216,11 @@ export default function Home() {
     } catch (error) {
       showNotice(error instanceof Error ? error.message : 'Unable to calculate.');
     }
+    focusEntry();
+  }
+
+  function cycleActiveAngle() {
+    patchState({ activeAngle: (state.activeAngle + 1) % state.angles.length });
     focusEntry();
   }
 
@@ -419,6 +445,16 @@ export default function Home() {
             </div>
           </div>
 
+          <div className="calculator-angle-tools">
+            <button className="active-angle-button" onClick={cycleActiveAngle}>
+              <span>Angle {state.activeAngle + 1}</span>
+              <strong>{formatValue(activeAngle, 4)}°</strong>
+            </button>
+            <div className="trig-grid calculator-trig-grid" aria-label="Side conversions">
+              {TRIG_BUTTONS.map((button) => <button key={button.operation} title={button.label} onClick={() => runTrig(button.operation)}>{button.short}</button>)}
+            </div>
+          </div>
+
           <div className="keypad" aria-label="Calculator keypad">
             {['7', '8', '9'].map((key) => <button key={key} onClick={() => appendKey(key)}>{key}</button>)}
             <button className="operator" aria-label="Divide" onClick={() => runOperator('divide')}>÷</button>
@@ -473,11 +509,7 @@ export default function Home() {
               </section>
 
               <section>
-                <p className="eyebrow">Side conversions</p>
-                <div className="trig-grid">
-                  {TRIG_BUTTONS.map((button) => <button key={button.operation} title={button.label} onClick={() => runTrig(button.operation)}>{button.short}</button>)}
-                </div>
-                <p className="tool-hint">Replaces the top stack value using angle {state.activeAngle + 1}.</p>
+                <p className="eyebrow">Build angle {state.activeAngle + 1}</p>
               </section>
 
               <section className="angle-builders">
