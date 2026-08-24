@@ -340,7 +340,7 @@ export default function Home() {
       key: `${state.stack.length - visibleStack.length + index}-${value}`,
       label: String(visibleStack.length - index),
       output: formatValue(value, state.rounding),
-      isCurrent: !hasEntry && index === visibleStack.length - 1,
+      isCurrent: false,
     })),
     ...(hasEntry ? [{
       key: `entry-${state.entry}`,
