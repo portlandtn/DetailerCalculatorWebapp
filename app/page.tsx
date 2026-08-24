@@ -397,6 +397,12 @@ export default function Home() {
             </div>
           </div>
 
+          <button className="home-angle-button" onClick={cycleActiveAngle}>
+            <span>Angle {state.activeAngle + 1}</span>
+            <strong>{formatValue(activeAngle, 4)}°</strong>
+            <small>{formatValue(Math.tan(activeAngle * Math.PI / 180) * 12, 3)} on 12</small>
+          </button>
+
           <button
             className="stack-display"
             onClick={() => {
