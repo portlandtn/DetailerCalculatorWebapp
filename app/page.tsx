@@ -254,6 +254,11 @@ export default function Home() {
   }
 
   function toggleSign() {
+    if (state.entry) {
+      patchState({ entry: state.entry.startsWith('-') ? state.entry.slice(1) : `-${state.entry}` });
+      focusEntry();
+      return;
+    }
     if (!state.stack.length) return showNotice('The stack is empty.');
     commitStack([...state.stack.slice(0, -1), -state.stack.at(-1)!]);
   }
