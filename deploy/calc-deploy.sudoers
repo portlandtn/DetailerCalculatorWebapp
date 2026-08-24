@@ -1,0 +1,2 @@
+# Calculator deployment runner: only the calculator service may be controlled.
+jedmay ALL=(root) NOPASSWD: /usr/bin/systemctl start calc.service, /usr/bin/systemctl stop calc.service, /usr/bin/systemctl restart calc.service, /usr/bin/systemctl is-active --quiet calc.service
