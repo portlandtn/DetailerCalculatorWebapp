@@ -7,6 +7,7 @@ import {
   calculateWeight,
   decimalFootToFoot,
   decimalInchToFoot,
+  detailingLabel,
   determineDimensionForWeight,
   footToDecimalFoot,
   footToDecimalInch,
@@ -38,6 +39,12 @@ test('matches the desktop decimal-inch conversions', () => {
     [54, 54.5, 1736.125, -1418].map((value) => rounded(decimalInchToFoot(value))),
     [4.06, 4.0608, 144.0802, -118.02],
   );
+});
+
+test('formats detailing dimensions with a sign and reduced fractions', () => {
+  assert.equal(detailingLabel(3.0808), '3′–8 1/2″');
+  assert.equal(detailingLabel(3.0806), '3′–8 3/8″');
+  assert.equal(detailingLabel(-3.0808), '−3′–8 1/2″');
 });
 
 test('preserves RPN operand order and detailing arithmetic', () => {

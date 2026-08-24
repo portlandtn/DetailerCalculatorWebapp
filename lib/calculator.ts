@@ -118,11 +118,20 @@ export function formatValue(value: number, decimals: number) {
   return value.toFixed(decimals);
 }
 
+function greatestCommonDivisor(a: number, b: number) {
+  while (b !== 0) {
+    [a, b] = [b, a % b];
+  }
+  return Math.abs(a);
+}
+
 export function detailingLabel(value: number) {
   const feet = Math.trunc(value);
   const fractional = Math.abs(value - feet);
   const inches = Math.trunc(roundNearInteger(fractional * 100));
   const sixteenths = Math.round((fractional * 100 - inches) * 100);
-  const sign = value < 0 && feet === 0 ? '−' : '';
-  return `${sign}${Math.abs(feet)}′–${Math.abs(inches)}${sixteenths ? ` ${Math.abs(sixteenths)}/16` : ''}″`;
+  const divisor = sixteenths ? greatestCommonDivisor(Math.abs(sixteenths), 16) : 1;
+  const fraction = sixteenths ? ` ${Math.abs(sixteenths) / divisor}/${16 / divisor}` : '';
+  const sign = value < 0 ? '−' : '';
+  return `${sign}${Math.abs(feet)}′–${Math.abs(inches)}${fraction}″`;
 }
