@@ -36,8 +36,9 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 .app-shell { min-height: 100dvh; padding: 18px; }
 .topbar { width: min(1180px, 100%); margin: 0 auto 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .brand-lockup { display: flex; align-items: center; gap: 12px; }
-.brand-mark { display: grid; place-items: center; width: 42px; height: 42px; flex: 0 0 auto; border: 1px solid #566473; border-radius: 10px; background: #16212c; color: var(--accent-2); font-family: var(--font-geist-mono), monospace; font-size: 13px; font-weight: 800; letter-spacing: .08em; box-shadow: inset 0 0 0 3px #0e161f; }
+.brand-mark { display: grid; place-items: center; width: 42px; height: 42px; flex: 0 0 auto; border: 1px solid #566473; border-radius: 10px; background: #16212c; color: var(--accent-2); font-family: var(--font-geist-mono), monospace; font-size: 13px; font-weight: 800; letter-spacing: .08em; cursor: pointer; box-shadow: inset 0 0 0 3px #0e161f; }
 .eyebrow { margin: 0 0 3px; color: var(--muted); font-size: 10px; font-weight: 750; letter-spacing: .16em; text-transform: uppercase; }
+.brand-dedication { margin: 5px 0 0; max-width: min(54vw, 420px); color: #b8c5cc; font-size: 11px; line-height: 1.35; }
 h1 { margin: 0; font-size: clamp(18px, 4vw, 24px); letter-spacing: -.04em; }
 h2 { margin: 0; font-size: 16px; letter-spacing: -.025em; }
 .save-status { display: flex; align-items: center; gap: 7px; color: #aec0ca; font-size: 12px; }
@@ -176,6 +177,7 @@ kbd { padding: 2px 5px; border: 1px solid #41515e; border-bottom-width: 2px; bor
   .app-shell { min-height: 100dvh; padding: 8px 8px 78px; display: flex; flex-direction: column; overflow: visible; }
   .topbar { flex: 0 0 auto; margin-bottom: 7px; }
   .brand-mark { width: 36px; height: 36px; }
+  .brand-dedication { max-width: 68vw; font-size: 10px; }
   .save-status { width: 8px; overflow: hidden; white-space: nowrap; }
   .mobile-page-nav { width: 100%; flex: 0 0 auto; margin: 0 auto 7px; padding: 3px; display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 10px; background: #0b131b; }
   .mobile-keypad-open .mobile-page-nav { display: none; }

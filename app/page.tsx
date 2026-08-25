@@ -103,6 +103,7 @@ export default function Home() {
   const [past, setPast] = useState<number[][]>([]);
   const [future, setFuture] = useState<number[][]>([]);
   const [notice, setNotice] = useState('');
+  const [showDedication, setShowDedication] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const noticeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const swipeStart = useRef<{ x: number; y: number } | undefined>(undefined);
@@ -368,10 +369,24 @@ export default function Home() {
     <main className={`app-shell ${mobileKeypadOpen ? 'mobile-keypad-open' : ''}`}>
       <header className="topbar">
         <div className="brand-lockup">
-          <span className="brand-mark" aria-hidden="true">DC</span>
+          <button
+            type="button"
+            className="brand-mark"
+            aria-expanded={showDedication}
+            aria-controls="app-dedication"
+            aria-label="Show dedication"
+            onClick={() => setShowDedication((current) => !current)}
+          >
+            AV
+          </button>
           <div>
-            <p className="eyebrow">Field tools · RPN</p>
+            <p className="eyebrow">Villalobos Edition</p>
             <h1>Detailer Calculator</h1>
+            {showDedication ? (
+              <p id="app-dedication" className="brand-dedication">
+                For Augie Villalobos — who asked for the next version.
+              </p>
+            ) : null}
           </div>
         </div>
         <span className="save-status" title="Calculator state is stored in this browser">
