@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Local acceptance testing only. Production is a Git-connected Pages project.
+  "name": "detailer-calculator-test",
+  "compatibility_date": "2026-05-01",
+  "assets": {
+    "directory": "./out",
+    "not_found_handling": "404-page"
+  }
+}
