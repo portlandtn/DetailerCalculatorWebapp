@@ -41,6 +41,18 @@ npm run dev
 
 Open `http://localhost:3000`.
 
+## Cloudflare static hosting
+
+`npm run build:cloudflare` produces the complete site in `out`, including locally
+served fonts, icons, manifest, and a release marker. Cloudflare Pages can build
+and publish it directly from GitHub without an Ubuntu runner.
+See [migration and rollback instructions](docs/cloudflare-migration.md) for exact
+project settings and the required staged domain verification.
+
+Run `npm run test:browser` after the static build to check it in the local
+Cloudflare asset runtime (install Chromium with `npx playwright install chromium`).
+Set `CALC_TEST_URL` to test an existing preview or production deployment.
+
 ## Linux hosting with Docker
 
 Set the public URL so social-preview links are generated correctly, then start the app:

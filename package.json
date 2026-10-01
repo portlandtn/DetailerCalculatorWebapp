@@ -10,7 +10,10 @@
     "build": "vinext build",
     "start": "vinext start",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
-    "test": "node --experimental-strip-types --test test/*.test.ts"
+    "test": "node --experimental-strip-types --test test/*.test.ts",
+    "build:cloudflare": "CALC_STATIC_EXPORT=1 NEXT_PUBLIC_SITE_URL=https://calc.jedmay.com next build && node scripts/write-deployment-meta.mjs",
+    "deploy:cloudflare": "wrangler pages deploy ./out --project-name detailer-calculator",
+    "test:browser": "playwright test"
   },
   "dependencies": {
     "next": "16.2.6",
@@ -21,6 +24,7 @@
     "@cloudflare/vite-plugin": "1.37.1",
     "@cloudflare/workers-types": "4.20260515.1",
     "@openai/sites-vite-plugin": "^0.1.0 || ^0.2.0",
+    "@playwright/test": "1.63.0",
     "@tailwindcss/postcss": "4.2.1",
     "@types/node": "22.19.19",
     "@types/react": "19.2.14",
