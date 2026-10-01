@@ -1,6 +1,6 @@
 # Cloudflare Pages migration
 
-## Intended delivery
+## Delivery
 
 Cloudflare Pages project `detailer-calculator`, connected to
 `portlandtn/DetailerCalculatorWebapp`, production branch `main`.
@@ -30,7 +30,7 @@ undo/redo/conversion, reload, steel weight, mobile keypad/tools, and static asse
 Nine unit tests cover detailing arithmetic, conversions, all six triangle
 operations, dimension formatting, steel units/weight, and divide-by-zero handling.
 
-## Staged cutover (must finish before claiming migration complete)
+## Staged cutover procedure
 
 1. Verify and merge the reviewed migration commit. This stops automatic Ubuntu
    restarts on future pushes but does not stop or alter the running service.
@@ -83,3 +83,24 @@ Sources:
 - https://developers.cloudflare.com/pages/configuration/git-integration/github-integration/
 - https://developers.cloudflare.com/pages/configuration/custom-domains/
 - https://developers.cloudflare.com/pages/platform/limits/
+
+## Migration record — 2026-10-01 UTC
+
+Initial Cloudflare production release: `9fbf5fccc43a4a17bf4710e758ae3ecc9492079f`
+([migration PR #1](https://github.com/portlandtn/DetailerCalculatorWebapp/pull/1)).
+Pages project: `detailer-calculator`; preview: https://detailer-calculator.pages.dev/.
+Public URL remains https://calc.jedmay.com/.
+
+GitHub-hosted PR and main checks passed. The actual Pages preview passed the
+release-marker/HTTPS check and all four browser acceptance tests before cutover.
+After the domain activation, the public hostname served the same release marker,
+passed all four browser tests, and restored every saved field captured from the
+old production site in an isolated browser. The existing valid wildcard HTTPS
+certificate remained in use. A zone-injected optional Cloudflare Insights beacon
+was blocked in the test environment; application asset checks explicitly cover
+first-party assets. No shared analytics setting was changed.
+
+The running Ubuntu calculator and tunnel were left intact for rollback. The exact
+old DNS record is retained in private local migration evidence, not this public
+repository. Continuing availability probes and dashboard domain status are
+recorded separately by the migration session.

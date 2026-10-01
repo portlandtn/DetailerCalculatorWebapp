@@ -62,7 +62,11 @@ test('mobile keypad and tools operate from static assets', async ({ browser }) =
 
 test('manifest, images, fonts and missing routes are served without an origin', async ({ page, request }) => {
   const failed: string[] = [];
-  page.on('requestfailed', req => failed.push(req.url()));
+  // Zone-level analytics may be blocked by privacy/network policy; validate
+  // the application's own assets independently of optional third-party beacons.
+  page.on('requestfailed', req => {
+    if (new URL(req.url()).origin === new URL(page.url()).origin) failed.push(req.url());
+  });
   const response = await page.goto('/');
   expect(response?.status()).toBe(200);
   await page.evaluate(() => document.fonts.ready);

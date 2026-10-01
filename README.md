@@ -44,8 +44,9 @@ Open `http://localhost:3000`.
 ## Cloudflare static hosting
 
 `npm run build:cloudflare` produces the complete site in `out`, including locally
-served fonts, icons, manifest, and a release marker. Cloudflare Pages can build
-and publish it directly from GitHub without an Ubuntu runner.
+served fonts, icons, manifest, and a release marker. Cloudflare Pages builds
+and publishes it directly from GitHub without an Ubuntu runner. Production is
+[calc.jedmay.com](https://calc.jedmay.com/).
 See [migration and rollback instructions](docs/cloudflare-migration.md) for exact
 project settings and the required staged domain verification.
 
