@@ -16,6 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: siteUrl,
+  alternates: { canonical: '/' },
   title: 'Detailer Calculator',
   description: 'Mobile-first RPN calculator for architectural detailing math.',
   applicationName: 'Detailer Calculator',
