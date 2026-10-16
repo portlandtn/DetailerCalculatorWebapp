@@ -54,6 +54,14 @@ Run `npm run test:browser` after the static build to check it in the local
 Cloudflare asset runtime (install Chromium with `npx playwright install chromium`).
 Set `CALC_TEST_URL` to test an existing preview or production deployment.
 
+## Search metadata
+
+The root layout declares a canonical URL using `NEXT_PUBLIC_SITE_URL`.
+`npm run build:cloudflare` sets it to `https://calc.jedmay.com`, so the exported
+homepage identifies `https://calc.jedmay.com/` as its canonical URL. Preview
+hosts retain that production canonical. Other hosting builds must set the
+variable to their intended public origin.
+
 ## Linux hosting with Docker
 
 Set the public URL so social-preview links are generated correctly, then start the app:
