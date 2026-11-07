@@ -28,7 +28,7 @@ test('static delivery supports keyboard RPN, undo, redo, conversion and reload',
   expect(errors).toEqual([]);
 });
 
-test('restores every existing persisted setting without a schema migration', async ({ page }) => {
+test('migrates every valid legacy persisted setting into the versioned envelope', async ({ page }) => {
   const saved = {
     stack: [12.0608, -3.25], entry: '9.12', mode: 'standard', rounding: 6,
     angles: [10, 20, 30, 40], activeAngle: 2, toolTab: 'weight',
@@ -41,9 +41,9 @@ test('restores every existing persisted setting without a schema migration', asy
   await expect(page.getByText('Saved on this device')).toBeVisible();
   await expect(page.getByRole('textbox', { name: 'Calculator entry' })).toHaveValue('9.12');
   await expect(page.locator('.weight-result strong')).toContainText('60.984000');
-  expect(await page.evaluate(key => JSON.parse(localStorage.getItem(key)!), key)).toEqual(saved);
+  expect(await page.evaluate(key => JSON.parse(localStorage.getItem(key)!), key)).toEqual({ schemaVersion: 2, state: saved });
   await page.getByRole('button', { name: 'Push weight to stack' }).click();
-  await expect.poll(() => page.evaluate(key => JSON.parse(localStorage.getItem(key)!).stack.at(-1), key)).toBeCloseTo(60.984);
+  await expect.poll(() => page.evaluate(key => JSON.parse(localStorage.getItem(key)!).state.stack.at(-1), key)).toBeCloseTo(60.984);
 });
 
 test('mobile keypad and tools operate from static assets', async ({ browser }) => {
@@ -75,4 +75,20 @@ test('manifest, images, fonts and missing routes are served without an origin', 
     expect((await request.get(path)).status()).toBe(200);
   }
   expect((await request.get('/this-route-does-not-exist')).status()).toBe(404);
+});
+
+
+test('corrupt state remains untouched while calculator opens with an explicit warning',async({page})=>{
+ await page.addInitScript(key=>localStorage.setItem(key,'{synthetic broken JSON'),key);
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await expect(page.getByText('Browser saving paused')).toBeVisible();
+ await expect(page.locator('.toast[role="status"]')).toContainText('without overwriting');
+ await page.getByRole('button',{name:'Standard',exact:true}).click();
+ expect(await page.evaluate(key=>localStorage.getItem(key),key)).toBe('{synthetic broken JSON');expect(errors).toEqual([]);
+});
+test('quota failure reports unavailable saving without breaking calculator',async({page})=>{
+ await page.addInitScript(()=>{Storage.prototype.setItem=()=>{throw new DOMException('synthetic quota','QuotaExceededError');};});
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await expect(page.getByText('Browser saving unavailable')).toBeVisible();
+ await page.getByRole('button',{name:'Standard',exact:true}).click();expect(errors).toEqual([]);
 });
