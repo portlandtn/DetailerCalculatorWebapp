@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  DEFAULT_ANGLE,
   baseRiseToAngle,
   calculate,
   calculateWeight,
@@ -14,54 +13,13 @@ import {
   footToDecimalInch,
   formatValue,
   trig,
-  type MathMode,
   type Operator,
   type TrigOperation,
 } from '../lib/calculator';
 
-type ToolTab = 'triangle' | 'convert' | 'weight' | 'guide';
-type Unit = 'feet' | 'inches';
+import { DEFAULT_STATE, STORAGE_KEY, restoreState, persistState, type CalculatorState, type Unit, type ToolTab } from '../lib/state';
 type MobilePage = 'calculator' | 'tools';
 type MobileKeypadTab = 'numbers' | 'triangle';
-
-interface CalculatorState {
-  stack: number[];
-  entry: string;
-  mode: MathMode;
-  rounding: number;
-  angles: number[];
-  activeAngle: number;
-  toolTab: ToolTab;
-  slopeInput: string;
-  manualAngle: string;
-  baseInput: string;
-  riseInput: string;
-  lengthInput: string;
-  widthInput: string;
-  thicknessInput: string;
-  lengthUnit: Unit;
-  widthUnit: Unit;
-}
-
-const STORAGE_KEY = 'detailer-calculator-state-v1';
-const DEFAULT_STATE: CalculatorState = {
-  stack: [0],
-  entry: '',
-  mode: 'detailing',
-  rounding: 4,
-  angles: [DEFAULT_ANGLE, DEFAULT_ANGLE, DEFAULT_ANGLE, DEFAULT_ANGLE],
-  activeAngle: 0,
-  toolTab: 'triangle',
-  slopeInput: '1',
-  manualAngle: '',
-  baseInput: '',
-  riseInput: '',
-  lengthInput: '',
-  widthInput: '',
-  thicknessInput: '',
-  lengthUnit: 'feet',
-  widthUnit: 'inches',
-};
 
 const OPERATOR_KEYS: Record<string, Operator> = {
   '+': 'add',
@@ -96,6 +54,7 @@ function sanitizeEntry(value: string) {
 export default function Home() {
   const [state, setState] = useState<CalculatorState>(DEFAULT_STATE);
   const [hydrated, setHydrated] = useState(false);
+  const [saveStatus, setSaveStatus] = useState('Restoring…');
   const [isMobileInput, setIsMobileInput] = useState(true);
   const [mobilePage, setMobilePage] = useState<MobilePage>('calculator');
   const [mobileKeypadOpen, setMobileKeypadOpen] = useState(false);
@@ -106,6 +65,7 @@ export default function Home() {
   const [showDedication, setShowDedication] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const noticeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const allowSave = useRef(true);
   const swipeStart = useRef<{ x: number; y: number } | undefined>(undefined);
 
   useEffect(() => {
@@ -119,20 +79,11 @@ export default function Home() {
     mobileInputQuery.addEventListener('change', updateMobileInput);
 
     const restoreTimer = window.setTimeout(() => {
-      try {
-        const saved = window.localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const parsed = JSON.parse(saved) as Partial<CalculatorState>;
-          setState({
-            ...DEFAULT_STATE,
-            ...parsed,
-            stack: Array.isArray(parsed.stack) ? parsed.stack.filter(Number.isFinite) : DEFAULT_STATE.stack,
-            angles: Array.isArray(parsed.angles) && parsed.angles.length === 4 ? parsed.angles : DEFAULT_STATE.angles,
-          });
-        }
-      } catch {
-        // A malformed local value should never prevent the calculator from opening.
-      }
+      const restored = restoreState(() => window.localStorage.getItem(STORAGE_KEY));
+      setState(restored.state);
+      allowSave.current = restored.allowSave;
+      if (!restored.allowSave) setSaveStatus('Browser saving paused');
+      if (restored.notice) setNotice(restored.notice);
       setHydrated(true);
       if (!mobileInputQuery.matches) inputRef.current?.focus({ preventScroll: true });
     }, 0);
@@ -144,7 +95,14 @@ export default function Home() {
 
   useEffect(() => {
     if (!hydrated) return;
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    if (!allowSave.current) return;
+    const error = persistState((value) => window.localStorage.setItem(STORAGE_KEY, value), state);
+    if (error) allowSave.current = false;
+    const timer = window.setTimeout(() => {
+      setSaveStatus(error ? 'Browser saving unavailable' : 'Saved on this device');
+      if (error) setNotice(error);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [state, hydrated]);
 
   useEffect(() => () => {
@@ -390,7 +348,7 @@ export default function Home() {
           </div>
         </div>
         <span className="save-status" title="Calculator state is stored in this browser">
-          <i /> {hydrated ? 'Saved on this device' : 'Restoring…'}
+          <i /> {saveStatus}
         </span>
       </header>
 
