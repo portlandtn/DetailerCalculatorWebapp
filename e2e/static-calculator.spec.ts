@@ -60,6 +60,18 @@ test('mobile keypad and tools operate from static assets', async ({ browser }) =
   await context.close();
 });
 
+test('migrates a partial legacy record without losing its calculation', async ({ page }) => {
+  const saved = { stack: [42], entry: '7', mode: 'standard', rounding: 6 };
+  await page.addInitScript(({ key, saved }) => localStorage.setItem(key, JSON.stringify(saved)), { key, saved });
+  await page.goto('/');
+  await expect(page.getByText('Saved on this device')).toBeVisible();
+  await expect(page.getByRole('textbox', { name: 'Calculator entry' })).toHaveValue('7');
+  const migrated = await page.evaluate(key => JSON.parse(localStorage.getItem(key)!), key);
+  expect(migrated.schemaVersion).toBe(2);
+  expect(migrated.state).toMatchObject({ ...saved, toolTab: 'triangle', lengthUnit: 'feet', widthUnit: 'inches' });
+  expect(migrated.state.angles).toHaveLength(4);
+});
+
 test('manifest, images, fonts and missing routes are served without an origin', async ({ page, request }) => {
   const failed: string[] = [];
   // Zone-level analytics may be blocked by privacy/network policy; validate
@@ -86,9 +98,42 @@ test('corrupt state remains untouched while calculator opens with an explicit wa
  await page.getByRole('button',{name:'Standard',exact:true}).click();
  expect(await page.evaluate(key=>localStorage.getItem(key),key)).toBe('{synthetic broken JSON');expect(errors).toEqual([]);
 });
-test('quota failure reports unavailable saving without breaking calculator',async({page})=>{
- await page.addInitScript(()=>{Storage.prototype.setItem=()=>{throw new DOMException('synthetic quota','QuotaExceededError');};});
- const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');await expect(page.getByText('Browser saving unavailable')).toBeVisible();
- await page.getByRole('button',{name:'Standard',exact:true}).click();expect(errors).toEqual([]);
+test('quota failure pauses saving through later edits and retries only after reload', async ({ page }) => {
+  await page.addInitScript(() => {
+    const original = Storage.prototype.setItem;
+    (window as Window & { syntheticWriteAttempts: number }).syntheticWriteAttempts = 0;
+    Storage.prototype.setItem = function (key, value) {
+      if (this === window.localStorage) {
+        (window as Window & { syntheticWriteAttempts: number }).syntheticWriteAttempts++;
+        if (sessionStorage.getItem('synthetic-storage-recovered') !== '1') {
+          throw new DOMException('synthetic quota', 'QuotaExceededError');
+        }
+      }
+      return original.call(this, key, value);
+    };
+  });
+  const attempts = () => page.evaluate(() => (window as Window & { syntheticWriteAttempts: number }).syntheticWriteAttempts);
+  const settleEffects = () => page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/');
+  await expect(page.getByText('Browser saving unavailable')).toBeVisible();
+  await expect(page.locator('.toast[role="status"]')).toContainText('Saving is paused until you reload');
+  expect(await attempts()).toBe(1);
+  await page.getByRole('button', { name: 'Standard', exact: true }).click();
+  const entry = page.getByRole('textbox', { name: 'Calculator entry' });
+  await entry.fill('42');
+  await expect(entry).toHaveValue('42');
+  await settleEffects();
+  expect(await attempts()).toBe(1);
+  // Recovery of the storage API alone must not silently resume writes.
+  await page.evaluate(() => sessionStorage.setItem('synthetic-storage-recovered', '1'));
+  await entry.fill('84');
+  await expect(entry).toHaveValue('84');
+  await settleEffects();
+  expect(await attempts()).toBe(1);
+  await page.reload();
+  await expect(page.getByText('Saved on this device')).toBeVisible();
+  expect(await attempts()).toBe(1);
+  expect(errors).toEqual([]);
 });

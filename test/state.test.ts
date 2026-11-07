@@ -12,6 +12,22 @@ test('bad JSON, future versions and unavailable storage preserve stored data',()
   const result=restoreState(read);assert.equal(result.allowSave,false);assert.deepEqual(result.state,DEFAULT_STATE);assert.ok(result.notice);
  }
 });
+test('fills missing legacy fields with defaults while preserving supplied settings',()=>{
+ const partial={stack:[42,-3.25],entry:'7',mode:'standard',rounding:6};
+ const restored=restoreState(()=>JSON.stringify(partial));
+ assert.equal(restored.allowSave,true);
+ assert.deepEqual(restored.state,{...DEFAULT_STATE,...partial});
+ let written='';assert.equal(persistState(value=>written=value,restored.state),'');
+ assert.deepEqual(JSON.parse(written),{schemaVersion:2,state:restored.state});
+ restored.state.angles[0]=99;
+ assert.notEqual(DEFAULT_STATE.angles[0],99);
+});
+test('legacy defaults do not hide invalid supplied fields or incomplete v2 records',()=>{
+ for(const value of [{stack:'invalid'},{rounding:null},{angles:[1,2]},{entry:{}},{schemaVersion:2,state:{stack:[42],entry:'7',mode:'standard'}}]) {
+  const restored=restoreState(()=>JSON.stringify(value));
+  assert.equal(restored.allowSave,false);assert.deepEqual(restored.state,DEFAULT_STATE);assert.ok(restored.notice);
+ }
+});
 test('rejects nonfinite values, oversized stacks, invalid precision and fields',()=>{
  for(const patch of [{stack:[NaN]},{stack:[Infinity]},{stack:Array(1001).fill(0)},{angles:[1,2,null,4]},{rounding:101},{rounding:0.5},{activeAngle:4},{mode:'unknown'},{entry:{}},{entry:'x'},{lengthUnit:'yards'}]) {
   assert.throws(()=>validateState({...DEFAULT_STATE,...patch}));

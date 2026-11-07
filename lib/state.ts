@@ -77,7 +77,9 @@ export function restoreState(read: ()=>string|null): {state:CalculatorState;noti
   if(raw.length>MAX_BYTES) throw new Error('Too large');
   const parsed:unknown=JSON.parse(raw);
   if(!record(parsed)) throw new Error('Invalid record');
-  const value='schemaVersion' in parsed ? (parsed.schemaVersion===2 ? parsed.state : null) : parsed;
+  // Older unversioned records can omit settings introduced after they were saved.
+  // Default missing fields only; validate every supplied value and keep v2 strict.
+  const value='schemaVersion' in parsed ? (parsed.schemaVersion===2 ? parsed.state : null) : {...DEFAULT_STATE,...parsed};
   return {state:validateState(value),notice:'',allowSave:true};
  } catch {
   return {state:structuredClone(DEFAULT_STATE),allowSave:false,notice:'Saved state could not be restored. Using defaults without overwriting saved data. Browser saving is paused.'};
@@ -88,5 +90,5 @@ export function persistState(write:(value:string)=>void,state:CalculatorState): 
   const raw=JSON.stringify({schemaVersion:2,state:validateState(state)});
   if(raw.length>MAX_BYTES) throw new Error('Too large');
   write(raw);return '';
- } catch { return 'Browser saving failed. Your current calculation remains available in this tab.'; }
+ } catch { return 'Browser saving failed. Your current calculation remains available in this tab. Saving is paused until you reload this page.'; }
 }

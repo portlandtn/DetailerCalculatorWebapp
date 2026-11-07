@@ -97,6 +97,7 @@ export default function Home() {
     if (!hydrated) return;
     if (!allowSave.current) return;
     const error = persistState((value) => window.localStorage.setItem(STORAGE_KEY, value), state);
+    if (error) allowSave.current = false;
     const timer = window.setTimeout(() => {
       setSaveStatus(error ? 'Browser saving unavailable' : 'Saved on this device');
       if (error) setNotice(error);
